@@ -38,9 +38,9 @@ def generate_input():
   return theta, p, q, cH, cM, cT
 
 def calculate_log_likelihood(theta, p, q, cH, cM, cT):
-  return cH * math.log(theta * p + (1 - theta) * q * q) + \
-        (cM * math.log((1 - theta) * 2 * q * (1 - q)) if cM > 0 else 0.0)+ \
-         cT * math.log(theta * (1 - p) + (1 - theta) * (1 - q) * (1 - q))
+  return (cH * math.log(theta * p + (1 - theta) * q * q) if cH > 0 else 0.0) + \
+         (cM * math.log((1 - theta) * 2 * q * (1 - q)) if cM > 0 else 0.0)+ \
+         (cT * math.log(theta * (1 - p) + (1 - theta) * (1 - q) * (1 - q)) if cT > 0 else 0.0)
 
 def calculate_precise_solution(cH, cM, cT):
   norm = 1.0 * (cH + cM + cT)
