@@ -4,7 +4,7 @@ import math
 EPS = 1e-10
 ITERATIONS = 20
 SAMPLE_SIZE = 100
-iteration = None # this has to be a global variable
+iteration = 123213 # this has to be a global variable
 
 def normalize(p):
   if p < EPS:
@@ -44,7 +44,7 @@ def calculate_log_likelihood(theta, p, q, cH, cM, cT):
 
 def calculate_precise_solution(cH, cM, cT):
   norm = 1.0 * (cH + cM + cT)
-  q = 0.77777 # because why not
+  q = 0.5 # because why not
   theta = 1.0 - cM / norm / (2 * q * (1 - q))
   p = (cH / norm - (1 - theta) * q * q) / theta
   return theta, p, q
@@ -94,10 +94,22 @@ def solve_by_EM(cH, cM, cT):
     cT1 = cT * pT1 / (pT1 + pT2)
     cT2 = cT * pT2 / (pT1 + pT2)
     # M step
-    p = cH1 / (cH1 + cT1)
+    p = cH1 / (cH1 + cT1) if cH1 + cT1 > 0 else 0.5
     q = normalize( (2.0 * cH2 + cM) / (2 * cT2 + 2 * cM + 2 * cH2) )
     theta = (cH1 + cT1) / (cH + cM + cT)
   return theta, p, q
+
+def test_three_algorithms(cH, cM, cT):
+  print 'CLOSED_FORM ',
+  theta, p, q = calculate_precise_solution(cH, cM, cT)
+  theta = normalize(theta)
+  print calculate_log_likelihood(theta, p, q, cH, cM, cT), theta, p, q
+  print 'GRAD_ASCENT ',
+  theta, p, q = solve_by_joint_gradient_ascent(cH, cM, cT)
+  print calculate_log_likelihood(theta, p, q, cH, cM, cT), theta, p, q
+  print 'EM_SOLUTION ',
+  theta, p, q = solve_by_EM(cH, cM, cT)
+  print calculate_log_likelihood(theta, p, q, cH, cM, cT), theta, p, q
 
 def run_testing_iterations():
   random.seed(0x3133)
@@ -106,16 +118,9 @@ def run_testing_iterations():
     print '---Iteration', iteration
     print 'DATA        ', cH, cM, cT
     print 'CORRECT     ', calculate_log_likelihood(theta, p, q, cH, cM, cT), theta, p, q
-    print 'CLOSED_FORM ',
-    theta, p, q = calculate_precise_solution(cH, cM, cT)
-    print calculate_log_likelihood(theta, p, q, cH, cM, cT), theta, p, q
-    print 'GRAD_ASCENT ',
-    theta, p, q = solve_by_joint_gradient_ascent(cH, cM, cT)
-    print calculate_log_likelihood(theta, p, q, cH, cM, cT), theta, p, q
-    print 'EM_SOLUTION ',
-    theta, p, q = solve_by_EM(cH, cM, cT)
-    print calculate_log_likelihood(theta, p, q, cH, cM, cT), theta, p, q
+    test_three_algrothims(cH, cM, cT)
     print '---\n'
 
 if __name__ == '__main__':
-  run_testing_iterations()
+  #run_testing_iterations()
+  test_three_algorithms(1, 10, 2)
